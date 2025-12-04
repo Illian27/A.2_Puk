@@ -1,5 +1,6 @@
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.common.by import By
 
 
 class BasePage:
@@ -37,3 +38,24 @@ class BasePage:
             return True
         except Exception:
             return False
+
+    def close_modal_if_present(self) -> bool:
+        """Intenta cerrar modales conocidos en la página.
+
+        Devuelve True si se ha encontrado y cerrado algún modal, False en caso contrario.
+        """
+        modal_locators = [
+            (By.ID, "modal-close"),
+            (By.XPATH, "//button[contains(., 'Entendido')]") ,
+            (By.XPATH, "//button[@aria-label='Cerrar modal de modal']"),
+            (By.CSS_SELECTOR, "button[data-testid='modal-close']"),
+        ]
+
+        for locator in modal_locators:
+            try:
+                # usar click que espera a que el elemento sea clickable
+                self.click(locator)
+                return True
+            except Exception:
+                continue
+        return False
