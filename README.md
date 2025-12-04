@@ -1,5 +1,5 @@
-# A.2 — Navegación y Búsqueda en El Corte Inglés (POM & unittest)
 
+# A.2 — Navegación y Búsqueda en El Corte Inglés (POM & unittest)
 ## 1. Objetivo
 
 Automatizar una secuencia de navegación en la web de El Corte Inglés utilizando Python y Selenium. Se debe aplicar rigurosamente el patrón Page Object Model (POM) y verificar cada etapa crítica mediante la librería de pruebas unitarias unittest.
@@ -60,6 +60,10 @@ El alumno debe crear un script de Python que cubra las siguientes secuencias, im
 
 > Se valorará entregar parcialmente este test (por ejemplo, sólo la acción de abrir el menú y seleccionar la marca), siempre que se documente lo que falta y por qué.
 
-**Autor**: Illian Santiago Ortega Posso
 
-**Asignatura**: PUK
+## Authors
+Illian Santiago Ortega Posso
+
+## Asignature
+PUK
+
