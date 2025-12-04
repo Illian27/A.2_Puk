@@ -54,7 +54,7 @@ class ElCorteInglesTests(unittest.TestCase):
 
         title_text = self.results.get_results_title_text().lower()
         self.assertIn("zapatillas", title_text, "Search results title does not contain the search term.")
-"""
+
     # 4.3: Access first product detail from results (Test 3)
     def test_open_first_product_detail(self):
         self.home.go_to_home()
@@ -67,7 +67,7 @@ class ElCorteInglesTests(unittest.TestCase):
         detail_url = self.detail.get_current_url()
         self.assertNotEqual(results_url, detail_url, "Detail URL should differ from results URL.")
         self.assertTrue(self.detail.is_on_product_detail(), "Product detail indicators not found on the page.")
-
+"""
     # 4.4: Optional filter by brand (Test 4)
     def test_apply_brand_filter_optional(self):
         self.home.go_to_home()

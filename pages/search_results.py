@@ -12,9 +12,10 @@ class SearchResultsPage(BasePage):
 
     # First product link: resilient patterns for product cards
     FIRST_PRODUCT_LINK_LOCATORS = [
-        (By.XPATH, "(//a[contains(@href, '/producto/') or contains(@href, '/moda/') or contains(@href, '/deportes/')])[1]"),
-        (By.CSS_SELECTOR, "a[data-testid*='product-card']:first-child"),
-        (By.CSS_SELECTOR, "article a[href*='/producto/']"),
+        (By.XPATH, "(//a[contains(@href, '/producto') or contains(@href, '/product') or contains(@href, '/moda') or contains(@href, '/deportes') or contains(@href, '/p/')])[1]"),
+        (By.CSS_SELECTOR, "a[data-testid*='product-card']"),
+        (By.CSS_SELECTOR, "article a[href]") ,
+        (By.CSS_SELECTOR, "[data-testid*='product-card'] a[href]"),
     ]
 
     # Brand filter: attempt common filter UI patterns
@@ -134,14 +135,124 @@ class SearchResultsPage(BasePage):
             self.close_modal_if_present()
         except Exception:
             pass
-
+        # Primero intentar con los localizadores directos
         for locator in self.FIRST_PRODUCT_LINK_LOCATORS:
             try:
                 self.click(locator)
                 return
             except Exception:
                 continue
-        raise RuntimeError("No product link found to click.")
+
+        # Nuevo fallback prioritario: buscar el primer <article> dentro del contenedor de "infinite scroll"
+        try:
+            container = None
+            try:
+                container = self.driver.find_element(By.CSS_SELECTOR, "div[data-testid='infiniteScroll']")
+            except Exception:
+                try:
+                    container = self.driver.find_element(By.CSS_SELECTOR, "div.container__infinite_scroll.infinite-scroll-container")
+                except Exception:
+                    container = None
+
+            if container:
+                articles = container.find_elements(By.CSS_SELECTOR, "article[id^='product-'], article.product_preview")
+                for art in articles:
+                    try:
+                        # Preferir el enlace interno si existe
+                        try:
+                            anchor = art.find_element(By.CSS_SELECTOR, "a[href]")
+                        except Exception:
+                            anchor = None
+
+                        clicked = False
+                        if anchor:
+                            try:
+                                anchor.click()
+                                clicked = True
+                            except Exception:
+                                try:
+                                    self.driver.execute_script("arguments[0].click();", anchor)
+                                    clicked = True
+                                except Exception:
+                                    clicked = False
+                        else:
+                            try:
+                                art.click()
+                                clicked = True
+                            except Exception:
+                                try:
+                                    self.driver.execute_script("arguments[0].click();", art)
+                                    clicked = True
+                                except Exception:
+                                    clicked = False
+
+                        if clicked:
+                            before = self.driver.current_url
+                            try:
+                                self.wait.until(lambda d: d.current_url != before and ('/producto' in d.current_url or '/product' in d.current_url or '/p/' in d.current_url))
+                                return
+                            except Exception:
+                                # Intentar detectar indicadores de página de detalle
+                                try:
+                                    self.wait.until(lambda d: len(d.find_elements(By.CSS_SELECTOR, "h1[itemprop='name'], button[id*='add-to-cart'], section.product-detail")) > 0)
+                                    return
+                                except Exception:
+                                    # si no conseguimos detectar navegación, continuar con siguientes artículos
+                                    continue
+                    except Exception:
+                        continue
+        except Exception:
+            pass
+
+        # Fallbacks anteriores: buscar en grid y por hrefs generales
+        for grid_locator in self.PRODUCT_GRID_ITEMS_LOCATORS:
+            try:
+                grid_items = self.driver.find_elements(*grid_locator)
+                for item in grid_items:
+                    try:
+                        anchor = None
+                        try:
+                            anchor = item.find_element(By.TAG_NAME, 'a')
+                        except Exception:
+                            anchor = None
+
+                        if anchor:
+                            try:
+                                anchor.click()
+                                return
+                            except Exception:
+                                try:
+                                    self.driver.execute_script("arguments[0].click();", anchor)
+                                    return
+                                except Exception:
+                                    continue
+                    except Exception:
+                        continue
+            except Exception:
+                continue
+
+        try:
+            anchors = self.driver.find_elements(By.XPATH, "//a[contains(@href,'/producto') or contains(@href,'/product') or contains(@href,'/p/') or contains(@href,'/articulo')]")
+            if anchors:
+                try:
+                    anchors[0].click()
+                    return
+                except Exception:
+                    try:
+                        self.driver.execute_script("arguments[0].click();", anchors[0])
+                        return
+                    except Exception:
+                        pass
+        except Exception:
+            pass
+
+        # Si no se encuentra ningún enlace, lanzar error con información de depuración
+        snippet = ""
+        try:
+            snippet = self.driver.page_source[:500]
+        except Exception:
+            pass
+        raise RuntimeError(f"No product link found to click. url='{self.driver.current_url}' snippet='{snippet[:200]}'")
 
     def open_brand_filter(self):
         # Cerrar modal si aparece
