@@ -35,7 +35,7 @@ class ElCorteInglesTests(unittest.TestCase):
         self.driver.quit()
 
     # 4.1: Access Home and accept cookies (Test 1)
-    def test_access_home_and_accept_cookies(self):
+    def test_01_access_home_and_accept_cookies(self):
         self.home.go_to_home()
         self.home.accept_cookies_if_present()
 
@@ -43,7 +43,7 @@ class ElCorteInglesTests(unittest.TestCase):
         self.assertIn("elcorteingles.es", current_url, "The current URL does not contain expected domain.")
 
     # 4.2: Search for product "zapatillas" (Test 2)
-    def test_search_zapatillas_and_verify(self):
+    def test_02_search_zapatillas_and_verify(self):
         self.home.go_to_home()
         self.home.accept_cookies_if_present()
         self.home.search("zapatillas")
@@ -56,7 +56,7 @@ class ElCorteInglesTests(unittest.TestCase):
         self.assertIn("zapatillas", title_text, "Search results title does not contain the search term.")
 
     # 4.3: Access first product detail from results (Test 3)
-    def test_open_first_product_detail(self):
+    def test_03_open_first_product_detail(self):
         self.home.go_to_home()
         self.home.accept_cookies_if_present()
         self.home.search("zapatillas")
@@ -69,7 +69,7 @@ class ElCorteInglesTests(unittest.TestCase):
         self.assertTrue(self.detail.is_on_product_detail(), "Product detail indicators not found on the page.")
 """
     # 4.4: Optional filter by brand (Test 4)
-    def test_apply_brand_filter_optional(self):
+    def test_04_apply_brand_filter_optional(self):
         self.home.go_to_home()
         self.home.accept_cookies_if_present()
         self.home.search("zapatillas")
